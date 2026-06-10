@@ -7,5 +7,5 @@ public interface IProductRepository
 {
     void Add(Product product);
     Product? GetByName(string name);
-    IReadOnlyCollection<Product> GetAll();
+    //IReadOnlyCollection<Product> GetAll();
 }
