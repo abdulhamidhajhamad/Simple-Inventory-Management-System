@@ -22,7 +22,14 @@ public class AddProductScreen : IConsoleScreen
             Console.WriteLine("--- Add a New Product ---");
         }
 
-        string name = ConsoleInput.PromptString("Enter product name: ");
+        string name = ConsoleInput.PromptString("Enter product name: ", nameInput =>
+        {
+            if (_inventoryService.IsNameDuplicate(nameInput))
+            {
+                return InventorySystem.Common.Result.Failure($"A product named '{nameInput}' already exists in the inventory.");
+            }
+            return InventorySystem.Common.Result.Success();
+        });
 
         decimal price = ConsoleInput.PromptDecimal("Enter product price: ", inputPrice =>
         {
