@@ -1,24 +1,23 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using InventorySystem.Repositories;
 using InventorySystem.Services;
 using InventorySystem.UI;
+using InventorySystem.UI.Screens;
 
-namespace InventorySystem;
+var repository = new InMemoryProductRepository();
+var inventoryService = new InventoryService(repository);
 
-internal class Program
+ConsoleUI ui = null!;
+
+var screens = new List<IConsoleScreen>
 {
-    private static void Main(string[] args)
-    {
-        Console.InputEncoding = System.Text.Encoding.UTF8;
-        Console.OutputEncoding = System.Text.Encoding.UTF8;
-        Console.Title = "Advanced Inventory Management System";
+    new AddProductScreen(inventoryService),
+    new ViewProductsScreen(inventoryService),
+    new EditProductScreen(inventoryService),
+    new DeleteProductScreen(inventoryService),
+    new ExitScreen(() => ui.Shutdown())
+};
 
-        IProductRepository repository = new InMemoryProductRepository();
+ui = new ConsoleUI(screens);
 
-        IInventoryService inventoryService = new InventoryService(repository);
-
-        ConsoleUI ui = new ConsoleUI(inventoryService);
-
-        ui.Run();
-    }
-}
+ui.Run();
