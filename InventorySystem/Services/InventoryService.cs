@@ -13,14 +13,18 @@ public class InventoryService : IInventoryService
         _repository = repository;
     }
 
+    public bool IsNameDuplicate(string name)
+    {
+        return _repository.GetByName(name) != null;
+    }
+
     public Result AddProduct(string name, decimal price, int quantity)
     {
         var productResult = Product.Create(name, price, quantity);
         if (productResult.IsFailure)
             return Result.Failure(productResult.ErrorMessage);
 
-        var existingProduct = _repository.GetByName(name);
-        if (existingProduct != null)
+        if (IsNameDuplicate(name))
             return Result.Failure($"A product named '{name}' already exists in the inventory.");
 
         _repository.Add(productResult.Value!);

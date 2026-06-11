@@ -55,28 +55,37 @@ public class ConsoleUI
         Console.Write("Select an option: ");
     }
 
-    private void HandleAddProduct()
+private void HandleAddProduct()
+{
+    Console.WriteLine("--- Add New Product ---");
+
+    string name = ConsoleInput.PromptString("Enter product name: ");
+
+    if (_inventoryService.IsNameDuplicate(name))
     {
-        Console.WriteLine("--- Add New Product ---");
-
-        string name = ConsoleInput.PromptString("Enter product name: ");
-        decimal price = ConsoleInput.PromptDecimal("Enter product price: ");
-        int quantity = ConsoleInput.PromptInt("Enter product quantity: ");
-
-        var result = _inventoryService.AddProduct(name, price, quantity);
-
-        if (result.IsSuccess)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("\nSuccess: Product added successfully!");
-        }
-        else
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"\nError: {result.ErrorMessage}");
-        }
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine($"\nError: A product named '{name}' already exists. Operation aborted.");
         Console.ResetColor();
+        return; 
     }
+
+    decimal price = ConsoleInput.PromptDecimal("Enter product price: ");
+    int quantity = ConsoleInput.PromptInt("Enter product quantity: ");
+
+    var result = _inventoryService.AddProduct(name, price, quantity);
+
+    if (result.IsSuccess)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("\nSuccess: Product added successfully!");
+    }
+    else
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine($"\nError: {result.ErrorMessage}");
+    }
+    Console.ResetColor();
+}
 
     private void HandleExit()
     {
