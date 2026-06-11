@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq; // ← تأكد من إضافة الـ Linq لحساب العرض ديناميكياً
+using System.Globalization;
+using System.Linq;
 using InventorySystem.Services;
 using InventorySystem.Domain;
 using InventorySystem.Common;
@@ -17,7 +18,6 @@ public class ConsoleUI
     {
         _inventoryService = inventoryService;
         
-        // التحديث السينيور للـ Registry بدون switch-case:
         _menuRegistry = new() 
         {
             { "1", ("Add a Product", HandleAddProduct) },
@@ -26,72 +26,84 @@ public class ConsoleUI
         };
     }
 
-    public void Run()
+public void Run()
+{
+    // تنظيف الشاشة لمرة واحدة فقط عند تشغيل البرنامج أول مرة
+    Console.Clear(); 
+
+    while (_isRunning)
     {
-        Console.Clear();
+        DisplayMenu();
+        
+        string? choice = Console.ReadLine()?.Trim();
+        Console.WriteLine(); // سطر فارغ لتنسيق بداية الأكشن
 
-        while (_isRunning)
+        if (choice != null && _menuRegistry.TryGetValue(choice, out var option))
         {
-            DisplayMenu();
-            string? choice = Console.ReadLine()?.Trim();
+            option.Action();
+            
+            // 🔥 حذفت الـ ReadKey والرسالة المزعجة من هنا!
             Console.WriteLine();
-
-            if (choice != null && _menuRegistry.TryGetValue(choice, out var option))
-            {
-                option.Action();
-            }
-            else
-            {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("Invalid choice. Try again.");
-                Console.ResetColor();
-            }
-
+            Console.WriteLine();
+        }
+        else
+        {
+            LogError("Invalid choice. Please select a valid option from the menu (1-3).");
             Console.WriteLine(); 
         }
     }
+}
 
     private void DisplayMenu()
     {
-        Console.WriteLine("=== Simple Inventory Management System ===");
+        Console.ForegroundColor = ConsoleColor.Gray;
+        Console.WriteLine("==================================================");
+        Console.WriteLine("    📦 SIMPLE INVENTORY MANAGEMENT SYSTEM         ");
+        Console.WriteLine("==================================================");
+        
         foreach (var item in _menuRegistry)
         {
-            Console.WriteLine($"{item.Key}. {item.Value.Description}");
+            Console.WriteLine($" [{item.Key}] {item.Value.Description}");
         }
-        Console.Write("Select an option: ");
+        
+        Console.WriteLine("--------------------------------------------------");
+        Console.Write("👉 Select an option: ");
+        Console.ResetColor();
     }
 
     private void HandleAddProduct()
     {
-        Console.WriteLine("--- Add New Product ---");
+        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.WriteLine("--- ➕ Add New Product ---");
+        Console.ResetColor();
 
-        string name = ConsoleInput.PromptString("Enter product name: ");
-        if (_inventoryService.IsNameDuplicate(name))
+        string name = ConsoleInput.PromptString("Enter product name: ", inputName => 
         {
-            LogError($"A product named '{name}' already exists. Operation aborted.");
-            return; 
-        }
+            if (_inventoryService.IsNameDuplicate(inputName))
+                return Result.Failure($"A product named '{inputName}' already exists in the inventory.");        
+            return Result.Success();
+        });
 
-        decimal price = ConsoleInput.PromptDecimal("Enter product price: ");
-        if (!InventorySystem.Domain.Product.IsValidPrice(price))
+        decimal price = ConsoleInput.PromptDecimal("Enter product price: ", inputPrice =>
         {
-            LogError("Price cannot be negative. Operation aborted.");
-            return;
-        }
+            if (!InventorySystem.Domain.Product.IsValidPrice(inputPrice))
+                return Result.Failure("Price must be greater than zero.");
+            return Result.Success();
+        });
 
-        int quantity = ConsoleInput.PromptInt("Enter product quantity: ");
-        if (!InventorySystem.Domain.Product.IsValidQuantity(quantity))
+        int quantity = ConsoleInput.PromptInt("Enter product quantity: ", inputQty =>
         {
-            LogError("Quantity cannot be negative. Operation aborted.");
-            return;
-        }
+            if (!InventorySystem.Domain.Product.IsValidQuantity(inputQty))
+                return Result.Failure("Quantity cannot be negative.");
+            return Result.Success();
+        });
 
         var result = _inventoryService.AddProduct(name, price, quantity);
 
         if (result.IsSuccess)
         {
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("\nSuccess: Product added successfully!");
+            Console.WriteLine("\n✨ Success: Product added successfully!");
         }
         else
         {
@@ -100,20 +112,21 @@ public class ConsoleUI
         Console.ResetColor();
     }
 
-
     private void HandleViewProducts()
     {
-        Console.WriteLine("--- All Inventory Products ---");
+        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.WriteLine("--- 📋 All Inventory Products ---");
+        Console.ResetColor();
 
         var result = _inventoryService.GetAllProducts();
 
-    if (!result.IsSuccess)
-    {
-        Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine($"\nInfo: {result.ErrorMessage ?? "No products found."}");
-        Console.ResetColor();
-        return;
-    }
+        if (!result.IsSuccess)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine($"\n💡 Info: {result.ErrorMessage ?? "No products found."}");
+            Console.ResetColor();
+            return;
+        }
 
         RenderTable(result.Value!);
     }
@@ -128,8 +141,8 @@ public class ConsoleUI
 
         foreach (var p in products)
         {
-            columnWidths[0] = Math.Max(columnWidths[0], p.Name?.Length ?? 0);
-            columnWidths[1] = Math.Max(columnWidths[1], $"{p.Price:F2}".Length);
+            columnWidths[0] = Math.Max(columnWidths[0], p.Name.Length);
+            columnWidths[1] = Math.Max(columnWidths[1], p.Price.ToString("F2", CultureInfo.InvariantCulture).Length);
             columnWidths[2] = Math.Max(columnWidths[2], p.Quantity.ToString().Length);
         }
 
@@ -147,7 +160,7 @@ public class ConsoleUI
         foreach (var p in products)
         {
             string nameStr = p.Name.PadRight(columnWidths[0] - 1);
-            string priceStr = $"{p.Price:F2}".PadRight(columnWidths[1] - 1);
+            string priceStr = p.Price.ToString("F2", CultureInfo.InvariantCulture).PadRight(columnWidths[1] - 1);
             string qtyStr = p.Quantity.ToString().PadRight(columnWidths[2] - 1);
 
             Console.WriteLine($"| {nameStr}| {priceStr}| {qtyStr}|");
@@ -162,8 +175,9 @@ public class ConsoleUI
     private static void LogError(string message)
     {
         Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine($"\nError: {message}");
+        Console.Write($"❌ Error: {message}");
         Console.ResetColor();
+        Console.WriteLine();
     }
 
     private void HandleExit()
