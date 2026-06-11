@@ -27,18 +27,27 @@ public class InMemoryProductRepository : IProductRepository
     {
         return _products.AsReadOnly();
     }
-    public void Update(string oldName, Product updatedProduct)
+public void Update(string oldName, Product updatedProduct)
+{
+    if (string.IsNullOrWhiteSpace(oldName) || updatedProduct == null) return;
+
+    var index = _products.FindIndex(p => p.Name.Equals(oldName, StringComparison.OrdinalIgnoreCase));
+    if (index != -1)
     {
-        if (string.IsNullOrWhiteSpace(oldName) || updatedProduct == null) return;
-
-        if (!oldName.Equals(updatedProduct.Name, StringComparison.OrdinalIgnoreCase))
-        {
-            _productsByNameIndex.Remove(oldName);
-        }
-        
-        _productsByNameIndex[updatedProduct.Name] = updatedProduct;
-
+        _products[index] = updatedProduct;
     }
+    else
+    {
+        _products.Add(updatedProduct);
+    }
+
+    if (!oldName.Equals(updatedProduct.Name, StringComparison.OrdinalIgnoreCase))
+    {
+        _productsByNameIndex.Remove(oldName);
+    }
+    
+    _productsByNameIndex[updatedProduct.Name] = updatedProduct;
+}
 
     public void Delete(Product product)
     {
