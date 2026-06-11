@@ -28,15 +28,23 @@ public class InMemoryProductRepository : IProductRepository
         return _products.AsReadOnly();
     }
     public void Update(string oldName, Product updatedProduct)
-{
-    if (string.IsNullOrWhiteSpace(oldName) || updatedProduct == null) return;
-
-    if (!oldName.Equals(updatedProduct.Name, StringComparison.OrdinalIgnoreCase))
     {
-        _productsByNameIndex.Remove(oldName);
-    }
-    
-    _productsByNameIndex[updatedProduct.Name] = updatedProduct;
+        if (string.IsNullOrWhiteSpace(oldName) || updatedProduct == null) return;
 
-}
+        if (!oldName.Equals(updatedProduct.Name, StringComparison.OrdinalIgnoreCase))
+        {
+            _productsByNameIndex.Remove(oldName);
+        }
+        
+        _productsByNameIndex[updatedProduct.Name] = updatedProduct;
+
+    }
+
+    public void Delete(Product product)
+    {
+        if (product == null) return;
+
+        _products.Remove(product);
+        _productsByNameIndex.Remove(product.Name);
+    }
 }

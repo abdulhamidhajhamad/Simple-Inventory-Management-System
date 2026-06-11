@@ -11,4 +11,5 @@ public interface IInventoryService
     Result<IReadOnlyCollection<Product>> GetAllProducts();
     Result<Product> GetProductForUpdate(string name);
     Result UpdateProduct(string oldName, string newName, decimal newPrice, int newQuantity);
+    Result DeleteProduct(string name);
 }

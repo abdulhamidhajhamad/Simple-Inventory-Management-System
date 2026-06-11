@@ -9,5 +9,6 @@ public interface IProductRepository
     Product? GetByName(string name);
     IReadOnlyCollection<Product> GetAll();
     void Update(string oldName, Product updatedProduct); 
-    
+    void Delete(Product product);
+
 }
