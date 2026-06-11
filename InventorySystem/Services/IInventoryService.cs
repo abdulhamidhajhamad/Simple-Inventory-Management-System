@@ -9,4 +9,6 @@ public interface IInventoryService
     Result AddProduct(string name, decimal price, int quantity);
     bool IsNameDuplicate(string name);
     Result<IReadOnlyCollection<Product>> GetAllProducts();
+    Result<Product> GetProductForUpdate(string name);
+    Result UpdateProduct(string oldName, string newName, decimal newPrice, int newQuantity);
 }

@@ -22,7 +22,8 @@ public class ConsoleUI
         {
             { "1", ("Add a Product", HandleAddProduct) },
             { "2", ("View All Products", HandleViewProducts) }, 
-            { "3", ("Exit", HandleExit) }                       
+            { "3", ("Edit a Product", HandleEditProduct) },
+            { "4", ("Exit", HandleExit) }                       
         };
     }
 
@@ -194,6 +195,60 @@ public class ConsoleUI
         _isRunning = false;
     }
 
+    private void HandleEditProduct()
+{
+    using (new ConsoleColorContext(ConsoleColor.Cyan))
+    {
+        Console.WriteLine("--- 📝 Edit/Update Existing Product ---");
+    }
+
+    string targetName = ConsoleInput.PromptString("Enter the name of the product to update: ", nameInput =>
+    {
+        var searchResult = _inventoryService.GetProductForUpdate(nameInput);
+        if (searchResult.IsFailure)
+            return Result.Failure(searchResult.ErrorMessage!); 
+        return Result.Success();
+    });
+
+    var currentProduct = _inventoryService.GetProductForUpdate(targetName).Value!;
+    Console.WriteLine($"\n💡 Current Data -> Name: {currentProduct.Name} | Price: {currentProduct.Price:F2} | Qty: {currentProduct.Quantity}");
+    Console.WriteLine("Enter the new details below:\n");
+
+    string newName = ConsoleInput.PromptString("Enter new product name: ", inputName => 
+    {
+        if (!targetName.Equals(inputName, StringComparison.OrdinalIgnoreCase) && _inventoryService.IsNameDuplicate(inputName))
+            return Result.Failure($"A product named '{inputName}' already exists.");        
+        return Result.Success();
+    });
+
+    decimal newPrice = ConsoleInput.PromptDecimal("Enter new product price: ", inputPrice =>
+    {
+        if (!InventorySystem.Domain.Product.IsValidPrice(inputPrice))
+            return Result.Failure("Price must be greater than zero.");
+        return Result.Success();
+    });
+
+    int newQuantity = ConsoleInput.PromptInt("Enter new product quantity: ", inputQty =>
+    {
+        if (!InventorySystem.Domain.Product.IsValidQuantity(inputQty))
+            return Result.Failure("Quantity cannot be negative.");
+        return Result.Success();
+    });
+
+    var result = _inventoryService.UpdateProduct(targetName, newName, newPrice, newQuantity);
+
+    if (result.IsSuccess)
+    {
+        using (new ConsoleColorContext(ConsoleColor.Green))
+        {
+            Console.WriteLine("\n✨ Success: Product updated successfully!");
+        }
+    }
+    else
+    {
+        LogError(result.ErrorMessage ?? "Failed to update product due to an unexpected error.");
+    }
+}
     private sealed class ConsoleColorContext : IDisposable
     {
         private readonly ConsoleColor _previousColor;

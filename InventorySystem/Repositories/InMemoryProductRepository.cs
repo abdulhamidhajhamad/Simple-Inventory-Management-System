@@ -27,4 +27,16 @@ public class InMemoryProductRepository : IProductRepository
     {
         return _products.AsReadOnly();
     }
+    public void Update(string oldName, Product updatedProduct)
+{
+    if (string.IsNullOrWhiteSpace(oldName) || updatedProduct == null) return;
+
+    if (!oldName.Equals(updatedProduct.Name, StringComparison.OrdinalIgnoreCase))
+    {
+        _productsByNameIndex.Remove(oldName);
+    }
+    
+    _productsByNameIndex[updatedProduct.Name] = updatedProduct;
+
+}
 }

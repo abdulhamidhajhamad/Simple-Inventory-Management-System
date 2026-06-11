@@ -42,4 +42,33 @@ return Result.Failure(productResult.ErrorMessage ?? "An unknown error occurred d
 
         return Result<IReadOnlyCollection<Product>>.Success(products);
     }
+
+    public Result<Product> GetProductForUpdate(string name)
+{
+    var product = _repository.GetByName(name);
+    if (product == null)
+    {
+        return Result<Product>.Failure($"The product '{name}' was not found in the inventory.");
+    }
+    return Result<Product>.Success(product);
+}
+
+public Result UpdateProduct(string oldName, string newName, decimal newPrice, int newQuantity)
+{
+    var product = _repository.GetByName(oldName);
+    if (product == null)
+        return Result.Failure($"The product '{oldName}' was not found.");
+
+    if (!oldName.Equals(newName, StringComparison.OrdinalIgnoreCase) && IsNameDuplicate(newName))
+    {
+        return Result.Failure($"A product named '{newName}' already exists in the inventory.");
+    }
+
+    var validationResult = Product.Create(newName, newPrice, newQuantity);
+    if (validationResult.IsFailure)
+        return Result.Failure(validationResult.ErrorMessage ?? "Invalid product updates.");
+
+    _repository.Update(oldName, validationResult.Value!);
+    return Result.Success();
+}
 }
