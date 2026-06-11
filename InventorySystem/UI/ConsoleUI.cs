@@ -13,7 +13,6 @@ public class ConsoleUI
     public ConsoleUI(IInventoryService inventoryService)
     {
         _inventoryService = inventoryService;
-        
         _menuRegistry = new() 
         {
             { "1", ("Add a Product", HandleAddProduct) },
@@ -23,6 +22,8 @@ public class ConsoleUI
 
     public void Run()
     {
+        Console.Clear();
+
         while (_isRunning)
         {
             DisplayMenu();
@@ -31,7 +32,7 @@ public class ConsoleUI
 
             if (choice != null && _menuRegistry.TryGetValue(choice, out var option))
             {
-                option.Action(); 
+                option.Action();
             }
             else
             {
@@ -40,16 +41,12 @@ public class ConsoleUI
                 Console.ResetColor();
             }
 
-            if (_isRunning)
-            {
-                Console.WriteLine("\nPress any key to continue...");
-                Console.ReadKey();
-            }
+            Console.WriteLine(); 
         }
     }
+
     private void DisplayMenu()
     {
-        Console.Clear();
         Console.WriteLine("=== Simple Inventory Management System ===");
         foreach (var item in _menuRegistry)
         {
