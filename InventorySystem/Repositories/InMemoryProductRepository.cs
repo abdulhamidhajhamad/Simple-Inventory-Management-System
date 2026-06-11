@@ -1,21 +1,25 @@
 using InventorySystem.Domain;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace InventorySystem.Repositories;
 
 public class InMemoryProductRepository : IProductRepository
 {
     private readonly List<Product> _products = new();
+    
+    private readonly Dictionary<string, Product> _productsByNameIndex = new(StringComparer.OrdinalIgnoreCase);
 
     public void Add(Product product)
     {
         _products.Add(product);
+        _productsByNameIndex[product.Name] = product;
     }
 
     public Product? GetByName(string name)
     {
-        return _products.FirstOrDefault(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+        if (string.IsNullOrWhiteSpace(name)) return null;
+
+        return _productsByNameIndex.TryGetValue(name, out var product) ? product : null;
     }
 }
