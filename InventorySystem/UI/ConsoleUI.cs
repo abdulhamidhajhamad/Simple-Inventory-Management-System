@@ -26,56 +26,57 @@ public class ConsoleUI
         };
     }
 
-public void Run()
-{
-    // تنظيف الشاشة لمرة واحدة فقط عند تشغيل البرنامج أول مرة
-    Console.Clear(); 
-
-    while (_isRunning)
+    public void Run()
     {
-        DisplayMenu();
-        
-        string? choice = Console.ReadLine()?.Trim();
-        Console.WriteLine(); // سطر فارغ لتنسيق بداية الأكشن
+        Console.Clear(); 
 
-        if (choice != null && _menuRegistry.TryGetValue(choice, out var option))
+        while (_isRunning)
         {
-            option.Action();
+            DisplayMenu();
             
-            // 🔥 حذفت الـ ReadKey والرسالة المزعجة من هنا!
-            Console.WriteLine();
-            Console.WriteLine();
-        }
-        else
-        {
-            LogError("Invalid choice. Please select a valid option from the menu (1-3).");
+            string? choice = Console.ReadLine()?.Trim();
             Console.WriteLine(); 
+
+            if (choice != null && _menuRegistry.TryGetValue(choice, out var option))
+            {
+                option.Action();
+                
+                Console.WriteLine();
+                Console.WriteLine();
+            }
+            else
+            {
+                string validRange = string.Join("-", _menuRegistry.Keys.Min(), _menuRegistry.Keys.Max());
+                LogError($"Invalid choice. Please select a valid option from the menu ({validRange}).");
+                Console.WriteLine(); 
+            }
         }
     }
-}
 
     private void DisplayMenu()
     {
-        Console.ForegroundColor = ConsoleColor.Gray;
-        Console.WriteLine("==================================================");
-        Console.WriteLine("    📦 SIMPLE INVENTORY MANAGEMENT SYSTEM         ");
-        Console.WriteLine("==================================================");
-        
-        foreach (var item in _menuRegistry)
+        using (new ConsoleColorContext(ConsoleColor.Gray))
         {
-            Console.WriteLine($" [{item.Key}] {item.Value.Description}");
+            Console.WriteLine("==================================================");
+            Console.WriteLine("    📦 SIMPLE INVENTORY MANAGEMENT SYSTEM         ");
+            Console.WriteLine("==================================================");
+            
+            foreach (var item in _menuRegistry)
+            {
+                Console.WriteLine($" [{item.Key}] {item.Value.Description}");
+            }
+            
+            Console.WriteLine("--------------------------------------------------");
+            Console.Write("👉 Select an option: ");
         }
-        
-        Console.WriteLine("--------------------------------------------------");
-        Console.Write("👉 Select an option: ");
-        Console.ResetColor();
     }
 
     private void HandleAddProduct()
     {
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.WriteLine("--- ➕ Add New Product ---");
-        Console.ResetColor();
+        using (new ConsoleColorContext(ConsoleColor.Cyan))
+        {
+            Console.WriteLine("--- ➕ Add New Product ---");
+        }
 
         string name = ConsoleInput.PromptString("Enter product name: ", inputName => 
         {
@@ -102,29 +103,32 @@ public void Run()
 
         if (result.IsSuccess)
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("\n✨ Success: Product added successfully!");
+            using (new ConsoleColorContext(ConsoleColor.Green))
+            {
+                Console.WriteLine("\n✨ Success: Product added successfully!");
+            }
         }
         else
         {
             LogError(result.ErrorMessage ?? "Failed to add product due to an unexpected error.");
         }
-        Console.ResetColor();
     }
 
     private void HandleViewProducts()
     {
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.WriteLine("--- 📋 All Inventory Products ---");
-        Console.ResetColor();
+        using (new ConsoleColorContext(ConsoleColor.Cyan))
+        {
+            Console.WriteLine("--- 📋 All Inventory Products ---");
+        }
 
         var result = _inventoryService.GetAllProducts();
 
         if (!result.IsSuccess)
         {
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine($"\n💡 Info: {result.ErrorMessage ?? "No products found."}");
-            Console.ResetColor();
+            using (new ConsoleColorContext(ConsoleColor.Yellow))
+            {
+                Console.WriteLine($"\n💡 Info: {result.ErrorMessage ?? "No products found."}");
+            }
             return;
         }
 
@@ -151,11 +155,12 @@ public void Run()
 
         string rowDivider = "+" + string.Join("+", columnWidths.Select(w => new string('-', w))) + "+";
 
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.WriteLine(rowDivider);
-        Console.WriteLine($"| {headers[0].PadRight(columnWidths[0] - 1)}| {headers[1].PadRight(columnWidths[1] - 1)}| {headers[2].PadRight(columnWidths[2] - 1)}|");
-        Console.WriteLine(rowDivider);
-        Console.ResetColor();
+        using (new ConsoleColorContext(ConsoleColor.Cyan))
+        {
+            Console.WriteLine(rowDivider);
+            Console.WriteLine($"| {headers[0].PadRight(columnWidths[0] - 1)}| {headers[1].PadRight(columnWidths[1] - 1)}| {headers[2].PadRight(columnWidths[2] - 1)}|");
+            Console.WriteLine(rowDivider);
+        }
 
         foreach (var p in products)
         {
@@ -167,16 +172,19 @@ public void Run()
         }
 
         Console.WriteLine(rowDivider);
-        Console.ForegroundColor = ConsoleColor.DarkGray;
-        Console.WriteLine($"📊 Total Product Types: {products.Count}");
-        Console.ResetColor();
+        
+        using (new ConsoleColorContext(ConsoleColor.DarkGray))
+        {
+            Console.WriteLine($"📊 Total Product Types: {products.Count}");
+        }
     }
 
     private static void LogError(string message)
     {
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.Write($"❌ Error: {message}");
-        Console.ResetColor();
+        using (new ConsoleColorContext(ConsoleColor.Red))
+        {
+            Console.Write($"❌ Error: {message}");
+        }
         Console.WriteLine();
     }
 
@@ -184,5 +192,21 @@ public void Run()
     {
         Console.WriteLine("Exiting application. Goodbye!");
         _isRunning = false;
+    }
+
+    private sealed class ConsoleColorContext : IDisposable
+    {
+        private readonly ConsoleColor _previousColor;
+
+        public ConsoleColorContext(ConsoleColor foregroundColor)
+        {
+            _previousColor = Console.ForegroundColor;
+            Console.ForegroundColor = foregroundColor;
+        }
+
+        public void Dispose()
+        {
+            Console.ForegroundColor = _previousColor;
+        }
     }
 }
