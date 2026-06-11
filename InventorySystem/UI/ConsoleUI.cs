@@ -12,7 +12,14 @@ public class ConsoleUI
 
     public ConsoleUI(IEnumerable<IConsoleScreen> screens)
     {
-        _screens = screens.ToDictionary(s => s.Key, s => s);
+        _screens = new Dictionary<string, IConsoleScreen>();
+        
+        int currentKey = 1;
+        foreach (var screen in screens)
+        {
+            _screens.Add(currentKey.ToString(), screen);
+            currentKey++;
+        }
     }
 
     public void Run()
@@ -34,8 +41,9 @@ public class ConsoleUI
             }
             else
             {
-                string validRange = string.Join("-", _screens.Keys.Min(), _screens.Keys.Max());
-                LogError($"Invalid choice. Please enter a value between {validRange}.");
+                int minKey = _screens.Keys.Select(int.Parse).Min();
+                int maxKey = _screens.Keys.Select(int.Parse).Max();
+                LogError($"Invalid choice. Please enter a value between {minKey}-{maxKey}.");
             }
         }
     }
@@ -43,9 +51,10 @@ public class ConsoleUI
     private void DisplayMenu()
     {
         Console.WriteLine("=== Inventory Management System ===");
-        foreach (var screen in _screens.Values.OrderBy(s => s.Key))
+        
+        foreach (var pair in _screens.OrderBy(p => int.Parse(p.Key)))
         {
-            Console.WriteLine($"{screen.Key}. {screen.Description}");
+            Console.WriteLine($"{pair.Key}. {pair.Value.Description}");
         }
         Console.Write("Select an option: ");
     }

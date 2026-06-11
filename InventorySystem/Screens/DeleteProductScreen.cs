@@ -13,7 +13,6 @@ public class DeleteProductScreen : IConsoleScreen
         _inventoryService = inventoryService;
     }
 
-    public string Key => "4";
     public string Description => "Delete a Product";
 
     public void Execute()

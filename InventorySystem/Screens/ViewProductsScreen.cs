@@ -14,7 +14,6 @@ public class ViewProductsScreen : IConsoleScreen
         _inventoryService = inventoryService;
     }
 
-    public string Key => "2";
     public string Description => "View All Products";
 
     public void Execute()

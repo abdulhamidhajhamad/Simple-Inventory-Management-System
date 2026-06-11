@@ -11,7 +11,6 @@ public class ExitScreen : IConsoleScreen
         _shutdownAction = shutdownAction;
     }
 
-    public string Key => "6";
     public string Description => "Exit";
 
     public void Execute()

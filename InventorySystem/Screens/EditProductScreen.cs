@@ -13,7 +13,6 @@ public class EditProductScreen : IConsoleScreen
         _inventoryService = inventoryService;
     }
 
-    public string Key => "3";
     public string Description => "Edit a Product";
 
     public void Execute()

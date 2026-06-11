@@ -12,7 +12,6 @@ public class AddProductScreen : IConsoleScreen
         _inventoryService = inventoryService;
     }
 
-    public string Key => "1";
     public string Description => "Add a Product";
 
     public void Execute()

@@ -13,7 +13,6 @@ public class SearchProductScreen : IConsoleScreen
         _inventoryService = inventoryService;
     }
 
-    public string Key => "5";
     public string Description => "Search for a Product";
 
     public void Execute()
