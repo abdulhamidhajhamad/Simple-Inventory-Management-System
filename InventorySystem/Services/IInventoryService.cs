@@ -12,4 +12,5 @@ public interface IInventoryService
     Result<Product> GetProductForUpdate(string name);
     Result UpdateProduct(string oldName, string newName, decimal newPrice, int newQuantity);
     Result DeleteProduct(string name);
+    Result<Product> SearchProductByName(string name);
 }

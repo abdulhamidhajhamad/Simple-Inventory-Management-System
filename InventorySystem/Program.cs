@@ -20,7 +20,8 @@ var screens = new List<IConsoleScreen>
     new ViewProductsScreen(inventoryService),
     new EditProductScreen(inventoryService),
     new DeleteProductScreen(inventoryService),
-    new ExitScreen(() => ui.Shutdown())
+    new SearchProductScreen(inventoryService), 
+    new ExitScreen(() => ui.Shutdown())     
 };
 
 ui = new ConsoleUI(screens);

@@ -82,4 +82,22 @@ public class InventoryService : IInventoryService
         _repository.Delete(product);
         return Result.Success();
     }
+
+    public Result<Product> SearchProductByName(string name)
+{
+    if (string.IsNullOrWhiteSpace(name))
+    {
+        return Result<Product>.Failure("Product name cannot be empty.");
+    }
+
+    var product = _repository.GetByName(name);
+    
+    if (product == null)
+    {
+        return Result<Product>.Failure($"The product '{name}' was not found in the inventory.");
+    }
+
+    return Result<Product>.Success(product);
+}
+
 }
