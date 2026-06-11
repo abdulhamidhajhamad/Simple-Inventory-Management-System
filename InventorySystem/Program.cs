@@ -9,7 +9,9 @@ internal class Program
 {
     private static void Main(string[] args)
     {
-        Console.Title = "Advanced Inventory Management System - Phase 1";
+        Console.InputEncoding = System.Text.Encoding.UTF8;
+        Console.OutputEncoding = System.Text.Encoding.UTF8;
+        Console.Title = "Advanced Inventory Management System";
 
         IProductRepository repository = new InMemoryProductRepository();
 
