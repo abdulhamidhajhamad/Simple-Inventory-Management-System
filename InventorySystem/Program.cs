@@ -1,8 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 using InventorySystem.Repositories;
 using InventorySystem.Services;
 using InventorySystem.UI;
 using InventorySystem.UI.Screens;
+
+Console.InputEncoding = Encoding.UTF8;
+Console.OutputEncoding = Encoding.UTF8;
 
 var repository = new InMemoryProductRepository();
 var inventoryService = new InventoryService(repository);
@@ -19,5 +24,4 @@ var screens = new List<IConsoleScreen>
 };
 
 ui = new ConsoleUI(screens);
-
 ui.Run();
