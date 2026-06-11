@@ -8,6 +8,9 @@ public class Product
     public decimal Price { get; private set; }
     public int Quantity { get; private set; }
 
+    public static bool IsValidPrice(decimal price) => price >= 0;
+    public static bool IsValidQuantity(int quantity) => quantity >= 0;
+
     private Product(string name, decimal price, int quantity)
     {
         Name = name;

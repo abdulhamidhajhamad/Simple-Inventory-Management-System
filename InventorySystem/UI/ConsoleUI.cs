@@ -60,17 +60,25 @@ private void HandleAddProduct()
     Console.WriteLine("--- Add New Product ---");
 
     string name = ConsoleInput.PromptString("Enter product name: ");
-
     if (_inventoryService.IsNameDuplicate(name))
     {
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine($"\nError: A product named '{name}' already exists. Operation aborted.");
-        Console.ResetColor();
+        LogError($"A product named '{name}' already exists. Operation aborted.");
         return; 
     }
 
     decimal price = ConsoleInput.PromptDecimal("Enter product price: ");
+    if (!InventorySystem.Domain.Product.IsValidPrice(price))
+    {
+        LogError("Price cannot be negative. Operation aborted.");
+        return;
+    }
+
     int quantity = ConsoleInput.PromptInt("Enter product quantity: ");
+    if (!InventorySystem.Domain.Product.IsValidQuantity(quantity))
+    {
+        LogError("Quantity cannot be negative. Operation aborted.");
+        return;
+    }
 
     var result = _inventoryService.AddProduct(name, price, quantity);
 
@@ -81,12 +89,17 @@ private void HandleAddProduct()
     }
     else
     {
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine($"\nError: {result.ErrorMessage}");
+        LogError(result.ErrorMessage);
     }
     Console.ResetColor();
 }
 
+private static void LogError(string message)
+{
+    Console.ForegroundColor = ConsoleColor.Red;
+    Console.WriteLine($"\nError: {message}");
+    Console.ResetColor();
+}
     private void HandleExit()
     {
         Console.WriteLine("Exiting application. Goodbye!");
