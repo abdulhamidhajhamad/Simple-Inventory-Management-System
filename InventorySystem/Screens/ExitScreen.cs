@@ -1,14 +1,14 @@
 using System;
-
+using InventorySystem.UI; 
 namespace InventorySystem.UI.Screens;
 
 public class ExitScreen : IConsoleScreen
 {
-    private readonly Action _shutdownAction;
+    private readonly ConsoleUI _ui;
 
-    public ExitScreen(Action shutdownAction)
+    public ExitScreen(ConsoleUI ui)
     {
-        _shutdownAction = shutdownAction;
+        _ui = ui ?? throw new ArgumentNullException(nameof(ui));
     }
 
     public string Description => "Exit";
@@ -16,6 +16,6 @@ public class ExitScreen : IConsoleScreen
     public void Execute()
     {
         Console.WriteLine("Exiting application. Goodbye!");
-        _shutdownAction();
+        _ui.Shutdown();
     }
 }

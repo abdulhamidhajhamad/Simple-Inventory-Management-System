@@ -7,13 +7,21 @@ namespace InventorySystem.UI;
 
 public class ConsoleUI
 {
-    private readonly Dictionary<string, IConsoleScreen> _screens;
+    private Dictionary<string, IConsoleScreen> _screens = new();
     private bool _isRunning = true;
+
+    public ConsoleUI()
+    {
+    }
 
     public ConsoleUI(IEnumerable<IConsoleScreen> screens)
     {
+        SetScreens(screens);
+    }
+
+    public void SetScreens(IEnumerable<IConsoleScreen> screens)
+    {
         _screens = new Dictionary<string, IConsoleScreen>();
-        
         int currentKey = 1;
         foreach (var screen in screens)
         {
@@ -51,7 +59,6 @@ public class ConsoleUI
     private void DisplayMenu()
     {
         Console.WriteLine("=== Inventory Management System ===");
-        
         foreach (var pair in _screens.OrderBy(p => int.Parse(p.Key)))
         {
             Console.WriteLine($"{pair.Key}. {pair.Value.Description}");
