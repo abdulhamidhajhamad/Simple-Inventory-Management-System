@@ -22,4 +22,9 @@ public class InMemoryProductRepository : IProductRepository
 
         return _productsByNameIndex.TryGetValue(name, out var product) ? product : null;
     }
+
+    public IReadOnlyCollection<Product> GetAll()
+    {
+        return _products.AsReadOnly();
+    }
 }

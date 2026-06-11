@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using InventorySystem.Common;
 using InventorySystem.Domain;
 using InventorySystem.Repositories;
@@ -22,12 +23,23 @@ public class InventoryService : IInventoryService
     {
         var productResult = Product.Create(name, price, quantity);
         if (productResult.IsFailure)
-            return Result.Failure(productResult.ErrorMessage);
-
+return Result.Failure(productResult.ErrorMessage ?? "An unknown error occurred during product creation.");
         if (IsNameDuplicate(name))
             return Result.Failure($"A product named '{name}' already exists in the inventory.");
 
         _repository.Add(productResult.Value!);
         return Result.Success();
+    }
+
+    public Result<IReadOnlyCollection<Product>> GetAllProducts()
+    {
+        var products = _repository.GetAll();
+
+        if (products.Count == 0)
+        {
+            return Result<IReadOnlyCollection<Product>>.Failure("The inventory is currently empty. Add some products first!");
+        }
+
+        return Result<IReadOnlyCollection<Product>>.Success(products);
     }
 }
